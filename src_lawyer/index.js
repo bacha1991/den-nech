@@ -1,16 +1,24 @@
+const fs = require('fs');
+
 const {
 	getURL,
 	getProfile,
-	getRequest
+	getRequest,
+	getPhone
 } = require('./utils');
-const { getLawyers } = require('./lawyers');
+const { getLawyers, getProfiles } = require('./lawyers');
 
 async function initApp() {
 	const getLawyersWrapper = () => new Promise(resolve => getLawyers(resolve));
 
-	let lawyers = await getLawyersWrapper();
+	const lawyers = await getLawyersWrapper();
+	const profiles = getProfiles(lawyers, responces => {
+		const result = responces.map(text => getPhone(text));
 
-	console.log(lawyers.length);
+		fs.writeFileSync(`result.txt`, result.join('\n'), 'utf8');
+		console.log(result);
+	});
+
 }
 
 initApp();

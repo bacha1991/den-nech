@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const loader = require('./loader');
 const { saveFiles } = require('./../src/generator');
 
 const {
@@ -16,11 +17,16 @@ global.appRoot = path.resolve(__dirname);
 async function initApp() {
 	const getLawyersWrapper = () => new Promise(resolve => getLawyers(resolve));
 
-	let lawyers = await getLawyersWrapper();
+	loader.start();
 
-	const profiles = getProfiles(lawyers, responces => {
-		const result = responces.map(({text, i}) => {
-			lawyers[i].phone = getPhone(text);
+	let lawyers = await getLawyersWrapper();
+	console.log('Get lawyers - ', lawyers.length);
+
+	const profiles = getProfiles([...lawyers], responces => {
+		responces.forEach(item => {
+			const {text = '', i} = item || {};
+			const lawyer = lawyers[i] || {};
+			lawyer.phone = getPhone(text);
 		});
 
 		lawyers = lawyers.reduce((memo, item) => {
@@ -36,6 +42,7 @@ async function initApp() {
 			return a.certcalc < b.certcalc ? -1 : 0;
 		});
 
+		console.log('Get profiles', lawyers.length);
 
 		for (let i = 0, l = lawyers.length; i < l; i++) {
 			const ITEMS = 2000;
@@ -43,6 +50,8 @@ async function initApp() {
 				saveFiles(0, 'lawyers', generateCsv(lawyers.slice(i - ITEMS, ITEMS)), 'csv');
 			}
 		}
+
+		loader.stop();
 	});
 
 }

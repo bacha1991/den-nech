@@ -7,7 +7,7 @@ const {
 const getLawyers = callback => {
 	const promises = [];
 
-	for (let i = 28; i >= 1; i--) {	// All region
+	for (let i = 28; i >= 27; i--) {	// All region
 		const promise = new Promise((resolve) => {
 			getRequest(getURL(i), resolve);
 		});
@@ -31,15 +31,43 @@ const getLawyers = callback => {
 };
 
 const getProfiles = (list, callback) => {
-	const promises = [];
+	const results = [];
+	const ITEMS = 100;
+	const splice = () => list.splice(0, ITEMS);
+	let index = 0;
+	let loaded = 0;
 
-	list.forEach(({ id }, i) => {
-		promises.push(new Promise((resolve) => {
-			getRequest(getProfileURL(id), text => resolve({text, i}));
-		}));
-	});
+	function getRequests(memoList) {
+		const memo = [];
 
-	Promise.all(promises).then(callback);
+		if (list.length <= 0) {
+			return callback(results);
+		}
+
+		memoList.forEach(({ id }) => {
+			const i = index;
+			memo.push(new Promise((resolve) => {
+				getRequest(getProfileURL(id), text => resolve({text, i}))
+					.on('error', (e) => {
+						resolve();
+						console.log(e);
+					})
+					.end();
+			}));
+
+			index++;
+		});
+
+		Promise.all(memo).then(result => {
+			results.push(...result);
+			getRequests(splice());
+
+			loaded += result.length;
+			process.stdout.write(` - ${loaded}`);
+		});
+	}
+
+	getRequests(splice());
 }
 
 

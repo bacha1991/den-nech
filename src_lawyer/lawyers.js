@@ -19,18 +19,23 @@ const getLawyers = callback => {
 		const results = values.reduce((memo, { items }) => {
 			memo.push(...items);
 			return memo;
-		}, []).map(({ id }) => id);
+		}, []).map(({ id, certcalc, firstname, surname }) => ({
+			id,
+			certcalc,
+			firstname,
+			surname
+		}));
 
-		callback(results.slice(0,10));
+		callback(results);
 	});
 };
 
 const getProfiles = (list, callback) => {
 	const promises = [];
 
-	list.forEach(id => {
-		promises.push(new Promise(resolve => {
-			getRequest(getProfileURL(id), resolve);
+	list.forEach(({ id }, i) => {
+		promises.push(new Promise((resolve) => {
+			getRequest(getProfileURL(id), text => resolve({text, i}));
 		}));
 	});
 

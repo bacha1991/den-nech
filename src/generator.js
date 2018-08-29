@@ -26,7 +26,7 @@ module.exports = {
 
   saveTxt: function(code) {
     let start = -1;
-    
+
     createResultDir(code);
 
     for (let i = 0; i < 100; i++) {
@@ -39,26 +39,26 @@ module.exports = {
     }
   },
 
-  saveCsv: function (code) {
+  saveCsv: function (code, data) {
     let start = -1;
     const type = 'csv';
-    
+
     createResultDir(code, type);
 
     for (let i = 0; i < 200; i++) {
 
-      const { end, result } = utils.generateCsv(code, start);
+      const { end = 0, result } = data || utils.generateCsv(code, start);
 
       start = end;
 
       writeFile(start, code, result, type);
-    }  
+    }
   },
 
   saveVcf: function (code) {
     let start = -1;
     const type = 'vcf';
-    
+
     createResultDir(code, type);
 
     for (let i = 0; i < 200; i++) {
@@ -68,6 +68,11 @@ module.exports = {
       start = end;
 
       writeFile(start, code, result, type);
-    }  
+    }
+  },
+
+  saveFiles: function(start, code, result, type) {
+    createResultDir(code, type);
+    writeFile(start, code, result, type);
   }
 };

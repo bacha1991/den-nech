@@ -18,8 +18,18 @@ module.exports = {
 	}),
 	getPhone: (text) => {
 		const regExp = /\+38\(\d{3}\)[\d|-]{9}/gm;
-		const [ phone = null ] = text.match(regExp);
+		const [ phone = null ] = text.match(regExp) || [];
 
 		return phone;
-	}
+	},
+	generateCsv: function(result) {
+		let raw = 'name,phone\n';
+		const d = text => decodeURI(text);
+
+		raw += result.map(({certcalc, firstname, surname, phone}, i) => {
+			return `${d(certcalc)}-${i},${phone}\n`
+		}).join('');
+
+      	return raw;
+	},
 };
